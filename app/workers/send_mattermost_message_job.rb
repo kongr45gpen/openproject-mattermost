@@ -1,5 +1,7 @@
 require 'net/http'
 require 'net/https'
+require 'json'
+require 'uri'
 
 class SendMattermostMessageJob < ApplicationJob
   include OpenProject::StaticRouting::UrlHelpers
@@ -10,6 +12,7 @@ class SendMattermostMessageJob < ApplicationJob
     @work_package = @journal.journable
     @project = @journal.project
     @user = @journal.user
+    @current_user = @journal.user
   end
 
   def perform
@@ -46,28 +49,48 @@ class SendMattermostMessageJob < ApplicationJob
     events_by_type.map do |type, data|
       case
       when type == :created
-        "* added a new task"
+        "* :heavy_plus_sign: added a new task"
+      when type == :deleted
+        "* :x: removed a task"
       when type == :commented
-        data[:note].map { |note| "* commented: #{note}" }.join('\n')
+        data[:note].map { |note| "* :speaking_head: commented: #{note}" }.join('\n')
       else
-        %w(status_id assigned_to_id).map do |key|
+        %w(status_id assigned_to_id priority_id due_date done_ratio).map do |key|
           next if data[key].blank? or data[key].first == data[key].last
           send("changed_#{key}_message", data[key])
-        end.compact.join('\n')
+        end.compact.join("\n")
       end
-    end.join('\n')
+    end.join("\n")
   end
 
   def changed_status_id_message(data)
     old_value = Status.find(data.first)
     new_value = Status.find(data.last)
-    "* changed status from **#{old_value}** to **#{new_value}**"
+    "* :arrow_forward: changed status from **#{old_value}** to **#{new_value}**"
   end
 
   def changed_assigned_to_id_message(data)
-    old_value = User.where(id: data.first).first || 'unassigned'
-    new_value = User.where(id: data.last).first || 'unassigned'
-    "* changed assignee from **#{old_value}** to **#{new_value}**"
+    old_value = Principal.find_by(id: data.first) || 'unassigned'
+    new_value = Principal.find_by(id: data.last) || 'unassigned'
+    "* :woman_astronaut: changed assignee from **#{old_value}** to **#{new_value}**"
+  end
+
+  def changed_priority_id_message(data)
+    old_value = Enumeration.find(data.first)
+    new_value = Enumeration.find(data.last)
+    "* :bow_and_arrow: changed priority from **#{old_value}** to **#{new_value}**"
+  end
+
+  def changed_due_date_message(data)
+    old_value = data.first || 'never'
+    new_value = data.last || 'never'
+    "* :clock1: changed due date from **#{old_value}** to **#{new_value}**"
+  end
+
+  def changed_done_ratio_message(data)
+    old_value = data.first
+    new_value = data.last
+    "* :running_man: changed progress from **#{old_value}**% to **#{new_value}**%"
   end
 
   def send_message(message)
@@ -77,7 +100,7 @@ class SendMattermostMessageJob < ApplicationJob
       next unless url.present?
       uri = URI.parse(url)
       req = Net::HTTP::Post.new(uri.request_uri)
-      req.body = "payload={\"username\": \"PM (#{@project.name})\", \"text\": \"#{message}\"}"
+      req.body = "payload=" + URI.escape({username: "PM #{@project.name}", text: message}.to_json)
       res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.instance_of?(URI::HTTPS)) do |http|
         http.request(req)
       end

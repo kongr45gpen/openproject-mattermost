@@ -7,7 +7,7 @@ module OpenProject::Mattermost::Patches::JournalPatch
 
       has_one :mattermost_event
 
-      after_save :mattermost_event_notification, if: :notes_changed?
+      after_save :mattermost_event_notification
     end
   end
 

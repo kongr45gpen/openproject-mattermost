@@ -17,7 +17,7 @@ module OpenProject::Mattermost::Patches::WorkPackagePatch
     end
 
     def mattermost_event_notification
-      if current_journal.present? && (@is_new_record || status_id_changed? || assigned_to_id_changed?)
+      if current_journal.present?
         Redmine::Hook.call_hook(
           :mattermost_event_notification,
           { journal: self.current_journal }

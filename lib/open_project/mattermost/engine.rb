@@ -28,7 +28,7 @@ module OpenProject::Mattermost
 
       menu :project_menu,
            :mattermost_settings,
-           { controller: :mattermost_settings, action: :get_data },
+           { controller: '/mattermost_settings', action: :get_data },
            after: :settings,
            param: :project_id,
            caption: "Mattermost Settings",

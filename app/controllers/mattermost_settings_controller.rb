@@ -1,6 +1,6 @@
 class MattermostSettingsController < ApplicationController
   # this is necessary if you want the project menu in the sidebar for your view
-  before_filter :find_optional_project, only: [:get_data, :update_data]
+  before_action :find_optional_project, only: [:get_data, :update_data]
 
   def get_data
     @data = {}
@@ -26,7 +26,7 @@ class MattermostSettingsController < ApplicationController
   private
 
   def update_settings
-    params[:data].map do |name, item|
+    params[:data].each do |name, item|
       setting = MattermostSetting.find_by(name: name)
       next unless setting.present?
       @project.mattermost_settings.find_or_create_by(setting: setting).tap do |s|
@@ -38,7 +38,7 @@ class MattermostSettingsController < ApplicationController
   end
 
   def update_mattermost_users
-    params[:mattermost_users].map do |login, mattermost_user|
+    params[:mattermost_users].each do |login, mattermost_user|
       user = User.find_by(login: login)
       next unless user.present?
       MattermostUser.find_or_create_by(user: user).tap do |s|
