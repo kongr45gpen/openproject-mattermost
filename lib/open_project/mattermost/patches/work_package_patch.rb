@@ -1,3 +1,4 @@
+require 'active_support/dependencies'
 require_dependency 'work_package'
 
 module OpenProject::Mattermost::Patches::WorkPackagePatch

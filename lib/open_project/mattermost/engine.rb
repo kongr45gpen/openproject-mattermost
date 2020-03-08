@@ -1,5 +1,6 @@
 # Prevent load-order problems in case openproject-plugins is listed after a plugin in the Gemfile
 # or not at all
+require 'active_support/dependencies'
 require 'open_project/plugins'
 
 module OpenProject::Mattermost
@@ -18,7 +19,7 @@ module OpenProject::Mattermost
     register(
       'openproject-mattermost',
       author_url: 'https://openproject.org',
-      requires_openproject: '>= 6.0.0',
+      requires_openproject: '>= 10.4.0',
       settings: settings
     ) do
 

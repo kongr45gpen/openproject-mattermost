@@ -1,4 +1,4 @@
-class FillIncomingHooksSettings < ActiveRecord::Migration
+class FillIncomingHooksSettings < ActiveRecord::Migration[4.2]
   def up
 
     # fill in incoming hooks settings

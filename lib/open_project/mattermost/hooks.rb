@@ -3,8 +3,7 @@ module OpenProject::Mattermost
 
     def mattermost_event_notification(context = {})
       event = MattermostEvent.find_or_create_by(context)
-      job = SendMattermostMessageJob.new(event)
-      Delayed::Job.enqueue(job, run_at: 5.seconds.from_now)
+      SendMattermostMessageJob.set(wait_until: 5.seconds.from_now).perform_later(event)
     end
   end
 end

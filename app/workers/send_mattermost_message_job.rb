@@ -3,23 +3,24 @@ require 'net/https'
 require 'json'
 require 'uri'
 
-class SendMattermostMessageJob < ApplicationJob
+class SendMattermostMessageJob < ::ApplicationJob
   include OpenProject::StaticRouting::UrlHelpers
 
-  def initialize(event)
+  queue_as :default
+  after_perform :success
+
+  def perform(event)
     @event = event
     @journal = @event.journal
     @work_package = @journal.journable
     @project = @journal.project
     @user = @journal.user
     @current_user = @journal.user
-  end
 
-  def perform
     send_message(message)
   end
 
-  def success(job)
+  def success
     events.destroy_all
   end
 
@@ -53,7 +54,7 @@ class SendMattermostMessageJob < ApplicationJob
       when type == :deleted
         "* :x: removed a task"
       when type == :commented
-        data[:note].map { |note| "* :speaking_head: commented: #{note}" }.join('\n')
+        data[:note].map { |note| "* :speaking_head: commented: #{note}" }.join("\n")
       else
         %w(status_id assigned_to_id priority_id due_date done_ratio).map do |key|
           next if data[key].blank? or data[key].first == data[key].last

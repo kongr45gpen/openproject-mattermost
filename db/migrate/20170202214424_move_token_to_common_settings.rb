@@ -1,4 +1,4 @@
-class MoveTokenToCommonSettings < ActiveRecord::Migration
+class MoveTokenToCommonSettings < ActiveRecord::Migration[4.2]
   def up
     incoming_hooks_tokens = ProjectsMattermostSetting.joins(:setting)
       .where(mattermost_settings: {name: 'incoming_hook_token'})

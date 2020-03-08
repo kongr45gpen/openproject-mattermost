@@ -1,4 +1,4 @@
-class FillMattermostSettings < ActiveRecord::Migration
+class FillMattermostSettings < ActiveRecord::Migration[4.2]
   def up
     settings = {
       'hook_url_default' => {

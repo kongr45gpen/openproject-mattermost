@@ -1,4 +1,4 @@
-class AddMattermostSettings < ActiveRecord::Migration
+class AddMattermostSettings < ActiveRecord::Migration[4.2]
   def change
     create_table :mattermost_settings do |t|
       t.integer :kind
