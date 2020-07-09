@@ -1,5 +1,5 @@
-require 'active_support/dependencies'
-require_dependency 'work_package'
+#require 'active_support/dependencies'
+#require_dependency 'work_package'
 
 module OpenProject::Mattermost::Patches::WorkPackagePatch
   def self.included(base)

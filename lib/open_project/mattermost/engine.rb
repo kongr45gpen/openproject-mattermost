@@ -1,11 +1,23 @@
 # Prevent load-order problems in case openproject-plugins is listed after a plugin in the Gemfile
 # or not at all
-require 'active_support/dependencies'
 require 'open_project/plugins'
 
 module OpenProject::Mattermost
   class Engine < ::Rails::Engine
     engine_name :openproject_mattermost
+
+    config.to_prepare do
+#     require 'open_project/mattermost/patches'
+#     require 'open_project/mattermost/patches/journal_patch'
+#     require 'open_project/mattermost/patches/project_patch'
+#     require 'open_project/mattermost/patches/user_patch'
+#     require 'open_project/mattermost/patches/work_package_patch'
+
+      Dir[File.expand_path("patches/*.rb", File.dirname(__FILE__))].sort.each { |f| require f  }
+      Dir[File.expand_path("../../../app/**/*.rb", File.dirname(__FILE__))].sort.each { |f| require f  }
+      
+      require_relative "./hooks.rb"
+    end
 
     include OpenProject::Plugins::ActsAsOpEngine
 
